@@ -1,6 +1,9 @@
 # TypeScript Notes
 
-## Guard Clasues
+## TODO
+- add notes before Guard Clauses
+
+## Guard Clauses
 - quickly narrows types within a function
 - classic pattern to deal with undefined & null:
 ```TypeScript
