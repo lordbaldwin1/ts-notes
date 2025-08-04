@@ -555,3 +555,68 @@ type FilteredSoldier = {
   [K in keyof Soldier]: Soldier[K] extends string ? Soldier[K] : never;
 };
 ```
+
+## Running TypeScript locally
+
+tsconfig.json
+- configures compiler behavior
+
+Here's a simple example:
+```TS
+{
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "target": "esnext"
+  }
+}
+```
+- `lib` specified the library files to include in compilation. I.E., what APIs are available for us to use.
+- `target` specified ECMAScript target version for the JS output.
+- `esnext` is great for starting a new project, but probably want to choose a specific version before publishing a project e.g. `es2024`.
+
+Important compiler options:
+- `lib:` Add `dom` and `dom.iterable` (note: lowercase) to the list of libraries to allow all the browser APIs if you're writing front-end code.
+- `strict:` If `true`, enables all strict type checking options. I strongly recommend it for new projects. You might need to turn it off if you're migrating an existing JS project.
+- `skipLibCheck:` If `true`, skips type checking of all declaration files (which means it won't try to type check your infinitely large `node_modules` folder). Drastically speeds up compilation time.
+- `verbatimModuleSyntax:` If `true`, simplifies some weirdness with importing and exporting types, basically it forces you to import and export types using the `import type` syntax. I recommend it.
+- `esModuleInterop:` If `true`, allows you to use `import` syntax with CommonJS modules. Very useful if you need to work with CommonJS (Node) code.
+`moduleDetection:` If set to `force`, will consider everything to be a module, which is what you want in any new project.
+`noUncheckedIndexedAccess`: If `true`, adds `undefined` to the type of any indexed access, which can prevent some runtime errors. I recommend it.
+
+Declaration Files `.d.ts`
+- They only contain type information - no runtime code allowed.
+
+Here's an example from boot.dev. They use sign-in with Google and Google, per their instructions, wants their JS library in your HTML. Because you still want static type hints in your editor, you do something like this:
+```TS
+declare global {
+  interface Window {
+    google: Google;
+  }
+}
+
+interface Google {
+  accounts: {
+    id: {
+      renderButton: (
+        a: HTMLElement,
+        b: {
+          type?: string;
+          theme?: string;
+          size?: string;
+          text?: string;
+          shape?: string;
+          width?: number;
+        },
+      ) => void;
+      prompt: () => void;
+      cancel: () => void;
+      initialize: ({ client_id: string, callback }) => void;
+      disableAutoSelect: () => void;
+      revoke: (client_id: string, callback) => void;
+    };
+  };
+}
+
+export {};
+```
+This just says "hey, there's a global variable called `google` one the `window` object, and it has this shape. Now, you can `window.google` in code and get hints.
